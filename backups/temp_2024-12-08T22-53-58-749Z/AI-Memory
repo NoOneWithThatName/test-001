@@ -101,6 +101,36 @@ recover the system's intended functionality from existing code and structure.
    - Generic "no information" display when no data configured
    - User-specific data isolation
 
+[BACKUP SYSTEM]
+1. Location:
+   - Backups stored in: C:/Users/Pierr/CascadeProjects/test-001/backups/
+   - Each backup named with format: [number]_[timestamp]
+   - Maintains sequential integrity
+
+2. Commands:
+   - Create backup: npm run backup
+     * Creates sequential numbered backup with timestamp
+     * Excludes node_modules, .git, and backups directory
+   
+   - List backups: npm run backup:list
+     * Shows all available backups with names
+   
+   - Remove backup: npm run backup:remove [backup-name]
+     * Removes specific backup
+     * Maintains sequential integrity
+   
+   - Revert to backup: npm run backup:revert [backup-name]
+     * Creates temporary backup of current state
+     * Removes current files (preserves node_modules, .git)
+     * Restores files from specified backup
+     * Reports success and temporary backup name
+
+3. Safety Features:
+   - Automatic temporary backup before revert
+   - Preserves critical directories (node_modules, .git)
+   - Sequential numbering prevents duplicates
+   - Timestamp ensures unique identification
+
 [SYSTEM COMMANDS]
 - "backup the project": Creates sequential backup of code and database
 - "list backups": Displays available backups for restoration
