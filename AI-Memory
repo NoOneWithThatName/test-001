@@ -1,0 +1,31 @@
+[SYSTEM OVERVIEW]
+Project Name: Vue Tracker Platform
+Created: 2024-12-08
+Purpose: Generic page-templating system with multi-user support
+
+[CORE COMPONENTS]
+1. Frontend: VueJS-based application
+2. Database: Local SQLite for development, migratable to Firebase/MongoDB
+3. Authentication: Multi-user support with user-specific views
+
+[SYSTEM COMMANDS]
+- "backup the project": Creates a sequential backup of code and database
+- "list backups": Displays available backups for restoration
+- "remove backup": Removes specific backup maintaining sequential integrity
+
+[ARCHITECTURE]
+1. Layout:
+   - Fixed navbar (top)
+   - Sidebar (left) with Page Links and View Links
+   - Main content area (right)
+
+2. View System:
+   - User-specific views with private access
+   - Generic routing for data isolation
+   - Customizable data sources and display options
+
+[CRITICAL NOTES]
+- All backups must maintain sequential integrity
+- Views are strictly user-isolated
+- No external project references allowed
+- Change logs and dev notes are date-specific
