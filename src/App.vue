@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <template v-if="authStore.isAuthenticated()">
+    <template v-if="authStore.isAuthenticated">
       <!-- Navbar -->
       <Navbar @toggle-sidebar="toggleSidebar" />
       <!-- Main Layout -->

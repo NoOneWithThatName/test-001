@@ -24,7 +24,7 @@
             placeholder="Enter your password"
           >
         </div>
-        <button type="submit" class="login-btn">Login</button>
+        <button type="submit" class="login-btn" :disabled="isLoading">Login</button>
       </form>
     </div>
   </div>
@@ -41,12 +41,22 @@ const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const isLoading = ref(false)
 
-const handleLogin = () => {
-  if (authStore.login(email.value, password.value)) {
-    router.push('/')
-  } else {
-    error.value = 'Invalid email or password'
+const handleLogin = async () => {
+  try {
+    isLoading.value = true
+    error.value = ''
+    
+    if (await authStore.login(email.value, password.value)) {
+      router.push('/')
+    } else {
+      error.value = 'Invalid email or password'
+    }
+  } catch (err) {
+    error.value = err.message || 'An error occurred during login'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
@@ -111,6 +121,11 @@ const handleLogin = () => {
 
 .login-btn:hover {
   background: #45a049;
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .error-message {

@@ -1,4 +1,4 @@
-`<template>
+<template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-content">
       <h2>Add New View</h2>
@@ -16,7 +16,7 @@
         </div>
         <div class="button-group">
           <button type="button" class="btn-secondary" @click="close">Cancel</button>
-          <button type="submit" class="btn-primary">Create View</button>
+          <button type="submit" class="btn-primary">Next</button>
         </div>
       </form>
     </div>
@@ -25,14 +25,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useViewStore } from '../stores/viewStore'
 
 const props = defineProps({
   show: Boolean
 })
 
-const emit = defineEmits(['close', 'view-created'])
-const viewStore = useViewStore()
+const emit = defineEmits(['close', 'view-name-submitted'])
 const viewName = ref('')
 
 const close = () => {
@@ -40,13 +38,10 @@ const close = () => {
   emit('close')
 }
 
-const handleSubmit = async () => {
-  try {
-    const newView = await viewStore.addView(viewName.value)
-    emit('view-created', newView)
-    close()
-  } catch (error) {
-    alert(error.message)
+const handleSubmit = () => {
+  if (viewName.value.trim()) {
+    emit('view-name-submitted', viewName.value.trim())
+    viewName.value = ''
   }
 }
 </script>
@@ -130,4 +125,4 @@ button {
 .btn-secondary:hover {
   background-color: #cbd5e0;
 }
-</style>`
+</style>

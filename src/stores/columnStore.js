@@ -7,7 +7,8 @@ export const useColumnStore = defineStore('columns', () => {
   // Available column types
   const columnTypes = [
     { value: 'text', label: 'Text' },
-    { value: 'number', label: 'Number (2 decimals)', format: '0.00' },
+    { value: 'number', label: 'Whole Number' },
+    { value: 'decimal', label: 'Decimal Number', format: '0.00' },
     { value: 'date', label: 'Date' },
     { value: 'boolean', label: 'Yes/No' },
     { value: 'email', label: 'Email' },

@@ -7,16 +7,8 @@
     <!-- Modal for creating new view -->
     <AddViewModal 
       :show="showAddViewModal"
-      @close="showAddViewModal = false"
-      @view-created="handleViewCreated"
-    />
-
-    <!-- Modal for adding columns -->
-    <AddColumnsModal
-      :show="showAddColumnsModal"
-      :view-id="selectedViewId"
-      @close="closeColumnsModal"
-      @columns-added="handleColumnsAdded"
+      @close="closeAddViewModal"
+      @view-name-submitted="handleViewNameSubmitted"
     />
   </div>
 </template>
@@ -26,53 +18,64 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useViewStore } from '../stores/viewStore'
 import AddViewModal from './AddViewModal.vue'
-import AddColumnsModal from './AddColumnsModal.vue'
 
 const router = useRouter()
 const viewStore = useViewStore()
 const showAddViewModal = ref(false)
-const showAddColumnsModal = ref(false)
-const selectedViewId = ref(null)
+const newViewName = ref('')
 
-const handleViewCreated = (newView) => {
+// Handle view name submission
+const handleViewNameSubmitted = (viewName) => {
+  newViewName.value = viewName
   showAddViewModal.value = false
-  selectedViewId.value = newView.id
-  showAddColumnsModal.value = true
-}
-
-const closeColumnsModal = () => {
-  showAddColumnsModal.value = false
-  selectedViewId.value = null
-}
-
-const handleColumnsAdded = () => {
-  closeColumnsModal()
-  // Navigate to the new view if needed
-  if (selectedViewId.value) {
-    const view = viewStore.getUserViews().find(v => v.id === selectedViewId.value)
-    if (view) {
-      router.push(view.path)
-    }
+  
+  try {
+    // Create view immediately with default columns
+    const view = viewStore.addView({
+      name: viewName,
+      columns: [
+        { id: 'title', label: 'Title', type: 'text', visible: true },
+        { id: 'description', label: 'Description', type: 'text', visible: true }
+      ],
+      data: []
+    })
+    
+    // Close modals and navigate to new view
+    closeAddViewModal()
+    router.push(view.path)
+  } catch (error) {
+    console.error('Failed to create view:', error)
+    alert(error.message)
   }
+}
+
+// Close modals
+const closeAddViewModal = () => {
+  showAddViewModal.value = false
+  newViewName.value = ''
 }
 </script>
 
 <style scoped>
 .view-creator {
-  margin: 10px 0;
+  margin: 1rem 0;
 }
 
 .add-view-btn {
   width: 100%;
-  padding: 8px;
-  background: #4CAF50;
-  color: white;
-  border: none;
+  padding: 0.75rem;
+  background: none;
+  border: 2px dashed #ddd;
   border-radius: 4px;
+  color: #666;
+  font-size: 0.9rem;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .add-view-btn:hover {
-  background: #45a049;
+  background: #f5f5f5;
+  border-color: #ccc;
+  color: #333;
 }
 </style>

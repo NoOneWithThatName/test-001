@@ -6,7 +6,7 @@
         <button 
           class="btn-icon edit"
           title="Edit Columns"
-          @click="showEditModal = true"
+          @click="editColumns"
         >
           ✎
         </button>
@@ -80,8 +80,8 @@
     <EditColumnsModal
       v-if="showEditModal"
       view-id="licenses"
-      @close="showEditModal = false"
-      @save="handleEditColumns"
+      @close="closeEditModal"
+      @save="saveColumns"
     />
   </div>
 </template>
@@ -97,6 +97,15 @@ const viewStore = useViewStore();
 const showEditModal = ref(false);
 const searchQuery = ref('');
 const statusFilter = ref('all');
+
+// Default columns configuration
+const columns = ref([
+  { id: 'name', label: 'Name', visible: true },
+  { id: 'key', label: 'License Key', visible: true },
+  { id: 'status', label: 'Status', visible: true },
+  { id: 'expiryDate', label: 'Expiry Date', visible: true },
+  { id: 'type', label: 'License Type', visible: true }
+]);
 
 // Mock license data
 const licenses = ref([
@@ -143,9 +152,17 @@ const formatDate = (dateString) => {
   });
 };
 
-const handleEditColumns = (columns) => {
+const editColumns = () => {
+  showEditModal.value = true;
+};
+
+const closeEditModal = () => {
   showEditModal.value = false;
-  // Handle column updates here
+};
+
+const saveColumns = (updatedColumns) => {
+  columns.value = updatedColumns;
+  showEditModal.value = false;
 };
 
 const deleteView = async () => {
@@ -205,25 +222,22 @@ const deleteLicense = (licenseId) => {
 }
 
 .btn-icon {
-  background: none;
+  padding: 8px;
   border: none;
-  font-size: 1.2em;
-  cursor: pointer;
-  padding: 5px;
   border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.btn-icon:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
 }
 
 .btn-icon.edit {
-  color: #4CAF50;
+  background: #03A9F4;
+  color: white;
 }
 
 .btn-icon.delete {
-  color: #f44336;
+  background: #f44336;
+  color: white;
 }
 
 .license-filters {

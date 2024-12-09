@@ -10,12 +10,12 @@
           <div class="action-header"></div>
         </div>
         <!-- Column Rows -->
-        <div v-for="(column, index) in columns" :key="index" class="column-form">
+        <div v-for="(column, index) in localColumns" :key="index" class="column-form">
           <div class="form-row">
             <div class="name-group">
               <input
                 :id="'columnName' + index"
-                v-model="column.name"
+                v-model="column.label"
                 type="text"
                 required
                 placeholder="Enter column name"
@@ -42,7 +42,7 @@
             </div>
             <div class="action-group">
               <button 
-                v-if="columns.length > 1" 
+                v-if="localColumns.length > 1" 
                 type="button" 
                 class="btn-icon" 
                 @click="removeColumn(index)"
@@ -80,108 +80,112 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useColumnStore } from '../stores/columnStore'
 
 const props = defineProps({
   show: Boolean,
-  viewId: String,
-  initialColumns: {
+  columns: {
     type: Array,
-    default: () => []
+    required: true
   }
 })
 
-const emit = defineEmits(['close', 'save'])
+const emit = defineEmits(['update:show', 'close', 'save'])
 const columnStore = useColumnStore()
-const columns = ref([])
+const localColumns = ref([])
 const columnTypes = columnStore.getColumnTypes()
 
-// Load initial columns when mounted and when they change
-onMounted(() => {
-  loadInitialColumns()
-})
+// Watch for changes in props.columns and show
+watch([() => props.columns, () => props.show], ([newColumns, show]) => {
+  if (show && newColumns) {
+    // Create a deep copy of the columns with error field
+    localColumns.value = newColumns.map(col => ({
+      id: col.id,
+      label: col.name || col.label || col.id,
+      type: col.type || 'text',
+      visible: col.visible !== false,
+      error: ''
+    }))
 
-const loadInitialColumns = () => {
-  // Create a deep copy of the initial columns with error field
-  columns.value = props.initialColumns.map(col => ({
-    ...col,
-    error: ''
-  }))
-
-  // Add an empty column if there are no columns
-  if (columns.value.length === 0) {
-    addColumn()
+    // Add an empty column if there are no columns
+    if (localColumns.value.length === 0) {
+      addColumn()
+    }
   }
-}
+}, { immediate: true })
 
 // Validate column name for duplicates
 const validateColumnName = (currentIndex) => {
-  const currentName = columns.value[currentIndex].name.trim().toLowerCase()
-  columns.value[currentIndex].error = ''
+  const currentName = localColumns.value[currentIndex].label.trim().toLowerCase()
+  localColumns.value[currentIndex].error = ''
 
   if (currentName) {
-    const duplicateIndex = columns.value.findIndex((col, index) => 
+    const duplicateIndex = localColumns.value.findIndex((col, index) => 
       index !== currentIndex && 
-      col.name.trim().toLowerCase() === currentName
+      (col.label || '').trim().toLowerCase() === currentName
     )
     
     if (duplicateIndex !== -1) {
-      columns.value[currentIndex].error = 'Column name must be unique'
+      localColumns.value[currentIndex].error = 'Column name must be unique'
     }
   }
 }
 
 // Computed property to check if the last column is complete and valid
 const canAddColumn = computed(() => {
-  const lastColumn = columns.value[columns.value.length - 1]
+  const lastColumn = localColumns.value[localColumns.value.length - 1]
   return lastColumn && 
-         lastColumn.name.trim() && 
+         lastColumn.label?.trim() && 
          lastColumn.type && 
          !lastColumn.error
 })
 
 // Computed property to check if all columns are valid
 const isValid = computed(() => {
-  return columns.value.every(col => 
-    col.name.trim() && 
+  return localColumns.value.every(col => 
+    col.label?.trim() && 
     col.type && 
     !col.error
-  ) && columns.value.length > 0
+  ) && localColumns.value.length > 0
 })
 
-const addColumn = () => {
-  if (canAddColumn.value || columns.value.length === 0) {
-    columns.value.push({
-      name: '',
-      type: '',
-      error: ''
-    })
-  }
+function addColumn() {
+  localColumns.value.push({
+    id: '',
+    label: '',
+    type: '',
+    visible: true,
+    error: ''
+  })
 }
 
-const removeColumn = (index) => {
-  columns.value.splice(index, 1)
-  // Revalidate all columns after removal
-  columns.value.forEach((_, idx) => validateColumnName(idx))
+function removeColumn(index) {
+  localColumns.value.splice(index, 1)
 }
 
-const close = () => {
+function close() {
+  emit('update:show', false)
   emit('close')
 }
 
-const handleSave = () => {
-  if (!isValid.value) {
-    alert('Please fix all errors before saving')
-    return
-  }
+function handleSave() {
+  if (!isValid.value) return
 
-  // Emit the columns directly
-  emit('save', columns.value.map(column => {
-    const { error, ...columnData } = column // Remove error field before saving
-    return columnData
+  // Map columns to final format
+  const finalColumns = localColumns.value.map(col => ({
+    id: col.id || generateId(col.label),
+    label: col.label.trim(),
+    type: col.type,
+    visible: col.visible
   }))
+
+  emit('save', finalColumns)
   close()
+}
+
+function generateId(label) {
+  return label.toLowerCase().replace(/[^a-z0-9]/g, '-')
 }
 </script>
 

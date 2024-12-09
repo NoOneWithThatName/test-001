@@ -4,12 +4,11 @@
       <h3>Navigation</h3>
       <router-link to="/" class="page-link">Dashboard</router-link>
     </div>
+    
     <div class="view-links">
-      <h3>Views</h3>
-      <router-link to="/licenses" class="page-link">Licenses</router-link>
       <ViewCreator />
       <router-link 
-        v-for="view in userViews" 
+        v-for="view in allViews" 
         :key="view.id"
         :to="view.path"
         class="page-link"
@@ -36,13 +35,7 @@ defineProps({
 const router = useRouter();
 const viewStore = useViewStore();
 
-// Filter out system pages from user views
-const userViews = computed(() => {
-  return viewStore.getUserViews().filter(view => {
-    const route = router.getRoutes().find(r => r.path === view.path);
-    return !route?.meta?.isSystemPage;
-  });
-});
+const allViews = computed(() => viewStore.allViews);
 </script>
 
 <style scoped>
@@ -52,6 +45,9 @@ const userViews = computed(() => {
   padding: 20px;
   overflow-y: auto;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 #sidebar.collapsed {
@@ -61,7 +57,9 @@ const userViews = computed(() => {
 }
 
 .page-links, .view-links {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .page-link {
@@ -70,7 +68,6 @@ const userViews = computed(() => {
   color: #333;
   text-decoration: none;
   border-radius: 4px;
-  margin: 0.25rem 0;
   transition: all 0.2s ease;
 }
 
@@ -89,12 +86,20 @@ const userViews = computed(() => {
 }
 
 .view-links {
-  margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #e9ecef;
 }
 
-.view-links h3, .page-links h3 {
+.view-links h3 {
+  padding: 0 1rem;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.page-links h3 {
   padding: 0 1rem;
   margin-bottom: 0.5rem;
   color: #666;
