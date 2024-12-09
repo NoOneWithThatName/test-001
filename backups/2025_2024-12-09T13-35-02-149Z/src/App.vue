@@ -2,11 +2,28 @@
   <div class="app-container">
     <template v-if="authStore.isAuthenticated()">
       <!-- Navbar -->
-      <Navbar @toggle-sidebar="toggleSidebar" />
+      <nav class="navbar">
+        <div class="navbar-start">
+          <button class="hamburger-btn" @click="toggleSidebar">
+            <div class="hamburger-icon" :class="{ active: !isSidebarCollapsed }">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+          <span class="navbar-brand">Vue Tracker Platform</span>
+        </div>
+        <div class="navbar-end">
+          <button class="logout-btn" @click="handleLogout">Logout</button>
+        </div>
+      </nav>
+
       <!-- Main Layout -->
-      <div class="app" style="display: flex; min-height: calc(100vh - 60px); margin-top: 60px;">
+      <div class="main-layout">
         <Sidebar :is-collapsed="isSidebarCollapsed" />
-        <MainContent />
+        <main class="main-content">
+          <router-view></router-view>
+        </main>
       </div>
     </template>
     <template v-else>
@@ -19,9 +36,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import Navbar from './components/Navbar.vue';
 import Sidebar from '@/components/Sidebar.vue';
-import MainContent from './components/MainContent.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -66,6 +81,12 @@ const handleLogout = () => {
   font-size: 1.25rem;
   font-weight: 500;
   margin-left: 10px;
+}
+
+.main-layout {
+  display: flex;
+  height: calc(100vh - 60px);
+  margin-top: 60px;
 }
 
 .main-content {
@@ -125,32 +146,5 @@ const handleLogout = () => {
 
 .logout-btn:hover {
   background: #c82333;
-}
-
-/* Global styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  background: #f5f5f5;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 </style>

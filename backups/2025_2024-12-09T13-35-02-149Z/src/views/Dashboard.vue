@@ -2,7 +2,7 @@
   <div class="dashboard">
     <div class="view-header">
       <h1>{{ currentView?.name || 'Dashboard' }}</h1>
-      <div class="view-actions" v-if="showViewActions">
+      <div class="view-actions" v-if="currentView">
         <button 
           class="btn-icon edit"
           title="Edit Columns"
@@ -43,45 +43,20 @@ const viewStore = useViewStore();
 const showEditModal = ref(false);
 
 const currentView = computed(() => {
-  if (route.path === '/') return null;
-  
-  // Handle Licenses view
-  if (route.path === '/licenses') {
-    return {
-      id: 'licenses',
-      name: 'Licenses',
-      path: '/licenses'
-    };
-  }
-  
   return viewStore.getUserViews().find(view => view.path === route.path);
-});
-
-const showViewActions = computed(() => {
-  return currentView.value && route.path !== '/';
 });
 
 const handleEditColumns = async (columns) => {
   if (currentView.value) {
-    try {
-      await viewStore.updateViewColumns(currentView.value.id, columns);
-      showEditModal.value = false;
-    } catch (error) {
-      console.error('Failed to update columns:', error);
-    }
+    await viewStore.updateViewColumns(currentView.value.id, columns);
+    showEditModal.value = false;
   }
 };
 
 const deleteView = async (view) => {
-  if (!view) return;
-  
   if (confirm(`Are you sure you want to delete the view "${view.name}"?`)) {
-    try {
-      await viewStore.removeView(view.id);
-      router.push('/');
-    } catch (error) {
-      console.error('Failed to delete view:', error);
-    }
+    await viewStore.deleteView(view.id);
+    router.push('/');
   }
 };
 </script>
@@ -93,35 +68,42 @@ const deleteView = async (view) => {
 
 .view-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.view-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
 }
 
 .view-actions {
   display: flex;
-  gap: 10px;
+  gap: 0.5rem;
 }
 
 .btn-icon {
   background: none;
   border: none;
-  font-size: 1.2em;
+  padding: 8px;
   cursor: pointer;
-  padding: 5px;
+  color: #6b7280;
+  transition: all 0.2s ease;
   border-radius: 4px;
-  transition: background-color 0.2s;
 }
 
 .btn-icon:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+  background: #f3f4f6;
 }
 
 .btn-icon.edit {
-  color: #4CAF50;
+  font-size: 1.2rem;
 }
 
 .btn-icon.delete {
-  color: #f44336;
+  font-size: 1.4rem;
 }
 </style>

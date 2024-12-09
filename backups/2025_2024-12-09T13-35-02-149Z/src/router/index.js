@@ -22,7 +22,7 @@ const router = createRouter({
       path: '/licenses',
       name: 'Licenses',
       component: LicensesView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, isSystemPage: true }
     },
     {
       path: '/:pathMatch(.*)*',

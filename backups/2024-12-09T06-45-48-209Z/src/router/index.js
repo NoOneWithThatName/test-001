@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
 import LoginView from '../views/LoginView.vue'
-import LicensesView from '../views/LicensesView.vue'
 import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
@@ -16,12 +15,6 @@ const router = createRouter({
       path: '/',
       name: 'Dashboard',
       component: Dashboard,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/licenses',
-      name: 'Licenses',
-      component: LicensesView,
       meta: { requiresAuth: true }
     },
     {

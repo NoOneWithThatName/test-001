@@ -1,30 +1,27 @@
 <template>
-  <div class="dashboard">
-    <div class="view-header">
-      <h1>{{ currentView?.name || 'Dashboard' }}</h1>
-      <div class="view-actions" v-if="showViewActions">
-        <button 
-          class="btn-icon edit"
-          title="Edit Columns"
-          @click="showEditModal = true"
-        >
-          ✎
-        </button>
-        <button 
-          class="btn-icon delete"
-          title="Delete View"
-          @click="deleteView(currentView)"
-        >
-          ×
-        </button>
-      </div>
+  <div class="main-content">
+    <div class="view-actions" v-if="showViewActions">
+      <button 
+        class="btn-icon edit"
+        title="Edit Columns"
+        @click="showEditModal = true"
+      >
+        ✎
+      </button>
+      <button 
+        class="btn-icon delete"
+        title="Delete View"
+        @click="deleteView"
+      >
+        ×
+      </button>
     </div>
     <router-view></router-view>
     
-    <!-- Edit Columns Modal -->
     <EditColumnsModal
       v-if="showEditModal"
-      :view-id="currentView?.id"
+      :show="showEditModal"
+      :columns="currentView?.columns || []"
       @close="showEditModal = false"
       @save="handleEditColumns"
     />
@@ -34,8 +31,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useViewStore } from '@/stores/viewStore';
-import EditColumnsModal from '@/components/EditColumnsModal.vue';
+import { useViewStore } from '../stores/viewStore';
+import EditColumnsModal from '../components/EditColumnsModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -44,16 +41,6 @@ const showEditModal = ref(false);
 
 const currentView = computed(() => {
   if (route.path === '/') return null;
-  
-  // Handle Licenses view
-  if (route.path === '/licenses') {
-    return {
-      id: 'licenses',
-      name: 'Licenses',
-      path: '/licenses'
-    };
-  }
-  
   return viewStore.getUserViews().find(view => view.path === route.path);
 });
 
@@ -72,12 +59,12 @@ const handleEditColumns = async (columns) => {
   }
 };
 
-const deleteView = async (view) => {
-  if (!view) return;
+const deleteView = async () => {
+  if (!currentView.value) return;
   
-  if (confirm(`Are you sure you want to delete the view "${view.name}"?`)) {
+  if (confirm(`Are you sure you want to delete "${currentView.value.name}"?`)) {
     try {
-      await viewStore.removeView(view.id);
+      await viewStore.removeView(currentView.value.id);
       router.push('/');
     } catch (error) {
       console.error('Failed to delete view:', error);
@@ -87,20 +74,19 @@ const deleteView = async (view) => {
 </script>
 
 <style scoped>
-.dashboard {
-  padding: 20px;
-}
-
-.view-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.main-content {
+  padding: 16px;
+  flex-grow: 1;
+  position: relative;
 }
 
 .view-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   display: flex;
-  gap: 10px;
+  gap: 16px;
+  z-index: 1;
 }
 
 .btn-icon {
