@@ -48,12 +48,17 @@ const handleLogin = async () => {
     isLoading.value = true
     error.value = ''
     
-    if (await authStore.login(email.value, password.value)) {
+    console.log('Attempting login with:', { email: email.value, password: password.value })
+    const success = await authStore.login(email.value, password.value)
+    console.log('Login result:', success)
+    
+    if (success) {
       router.push('/')
     } else {
       error.value = 'Invalid email or password'
     }
   } catch (err) {
+    console.error('Login error:', err)
     error.value = err.message || 'An error occurred during login'
   } finally {
     isLoading.value = false

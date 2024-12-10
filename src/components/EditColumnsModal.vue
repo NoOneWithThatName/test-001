@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-content">
-      <h2>Edit View Columns</h2>
+      <h2>Manage Columns</h2>
       <div class="columns-container">
         <!-- Column Headers -->
         <div class="column-headers">
@@ -85,13 +85,14 @@ import { useColumnStore } from '../stores/columnStore'
 
 const props = defineProps({
   show: Boolean,
+  viewId: String,
   columns: {
     type: Array,
-    required: true
+    default: () => []
   }
 })
 
-const emit = defineEmits(['update:show', 'close', 'save'])
+const emit = defineEmits(['close', 'save'])
 const columnStore = useColumnStore()
 const localColumns = ref([])
 const columnTypes = columnStore.getColumnTypes()
@@ -165,7 +166,6 @@ function removeColumn(index) {
 }
 
 function close() {
-  emit('update:show', false)
   emit('close')
 }
 

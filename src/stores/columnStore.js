@@ -59,6 +59,42 @@ export const useColumnStore = defineStore('columns', () => {
     })
   }
 
+  function updateColumnOrder(viewId, newColumns) {
+    // Ensure the view exists in the columns map
+    if (!columns.value[viewId]) {
+      columns.value[viewId] = []
+    }
+
+    // Create a map of existing columns by their ID or label
+    const existingColumnsMap = new Map(
+      columns.value[viewId].map(col => [col.id || col.label, col])
+    )
+
+    // Create new column list maintaining the new order and existing properties
+    const updatedColumns = newColumns.map(newCol => {
+      // Try to find an existing column by ID first, then by label
+      const existingCol = existingColumnsMap.get(newCol.id) || 
+                          existingColumnsMap.get(newCol.label)
+      
+      // Merge existing column properties with new column data
+      return existingCol 
+        ? { 
+            ...existingCol, 
+            ...newCol,
+            // Preserve the original ID if it exists
+            id: existingCol.id || newCol.id 
+          }
+        : { 
+            ...newCol, 
+            // Generate a new ID if not present
+            id: newCol.id || `${viewId}-col-${Date.now()}` 
+          }
+    })
+
+    // Update columns for the view
+    columns.value[viewId] = updatedColumns
+  }
+
   return {
     columns,
     addColumn,
@@ -66,6 +102,7 @@ export const useColumnStore = defineStore('columns', () => {
     getColumns,
     getColumnTypes,
     initializeColumns,
-    updateViewColumns
+    updateViewColumns,
+    updateColumnOrder
   }
 })

@@ -10,6 +10,15 @@
       @close="closeAddViewModal"
       @view-name-submitted="handleViewNameSubmitted"
     />
+
+    <!-- Modal for managing columns -->
+    <ManageColumnsModal
+      :show="showManageColumnsModal"
+      :viewId="newViewId"
+      :columns="[]"
+      @close="closeManageColumnsModal"
+      @save="handleSaveColumns"
+    />
   </div>
 </template>
 
@@ -18,11 +27,14 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useViewStore } from '../stores/viewStore'
 import AddViewModal from './AddViewModal.vue'
+import ManageColumnsModal from './ManageColumnsModal.vue'
 
 const router = useRouter()
 const viewStore = useViewStore()
 const showAddViewModal = ref(false)
+const showManageColumnsModal = ref(false)
 const newViewName = ref('')
+const newViewId = ref(null)
 
 // Handle view name submission
 const handleViewNameSubmitted = (viewName) => {
@@ -30,29 +42,45 @@ const handleViewNameSubmitted = (viewName) => {
   showAddViewModal.value = false
   
   try {
-    // Create view immediately with default columns
-    const view = viewStore.addView({
+    // Create view with no columns initially
+    const view = viewStore.createView({
       name: viewName,
-      columns: [
-        { id: 'title', label: 'Title', type: 'text', visible: true },
-        { id: 'description', label: 'Description', type: 'text', visible: true }
-      ],
+      columns: [],
       data: []
     })
     
-    // Close modals and navigate to new view
-    closeAddViewModal()
-    router.push(view.path)
+    if (view && view.id) {
+      newViewId.value = view.id
+      // Show columns modal immediately
+      showManageColumnsModal.value = true
+    }
   } catch (error) {
     console.error('Failed to create view:', error)
     alert(error.message)
   }
 }
 
-// Close modals
+const handleSaveColumns = (columns) => {
+  if (!newViewId.value) return
+
+  try {
+    viewStore.updateView(newViewId.value, { columns })
+    closeManageColumnsModal()
+    router.push(`/views/${newViewId.value}`)
+  } catch (error) {
+    console.error('Failed to update columns:', error)
+    alert(error.message)
+  }
+}
+
 const closeAddViewModal = () => {
   showAddViewModal.value = false
   newViewName.value = ''
+}
+
+const closeManageColumnsModal = () => {
+  showManageColumnsModal.value = false
+  newViewId.value = null
 }
 </script>
 

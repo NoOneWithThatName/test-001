@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-content">
-      <h2>Add New View</h2>
+      <h2>New View</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="viewName">View Name</label>

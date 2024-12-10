@@ -1,17 +1,20 @@
 <template>
   <aside id="sidebar" :class="{ collapsed: isCollapsed }">
+<!--
     <div class="page-links">
       <h3>Navigation</h3>
       <router-link to="/" class="page-link">Dashboard</router-link>
     </div>
-    
+  -->    
+  <router-link to="/" class="sidebar-link">Dashboard</router-link>
+
     <div class="view-links">
       <ViewCreator />
       <router-link 
         v-for="view in allViews" 
         :key="view.id"
         :to="view.path"
-        class="page-link"
+        class="view-link"
       >
         {{ view.name }}
       </router-link>
@@ -56,27 +59,46 @@ const allViews = computed(() => viewStore.allViews);
   overflow: hidden;
 }
 
-.page-links, .view-links {
+/*
+  .page-links, .view-links {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+*/
 
-.page-link {
+.sidebar-link {
   display: block;
   padding: 0.75rem 1rem;
+  color: #333;
+  background: yellow;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+
+.view-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  margin-bottom: 5px;
   color: #333;
   text-decoration: none;
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
-.page-link:hover {
-  background: #e9ecef;
+
+.sidebar-link:hover {
+  background-color: #c0c0c0;
+}
+
+.view-link:hover {
+  background-color: #c0c0c0;
 }
 
 .router-link-active {
-  background: #4CAF50;
+  background: #808080;
   color: white;
   font-weight: 500;
 }
@@ -99,7 +121,7 @@ const allViews = computed(() => viewStore.allViews);
   letter-spacing: 0.5px;
 }
 
-.page-links h3 {
+.view-links h3 {
   padding: 0 1rem;
   margin-bottom: 0.5rem;
   color: #666;

@@ -6,7 +6,10 @@
       <!-- Main Layout -->
       <div class="app" style="display: flex; min-height: calc(100vh - 60px); margin-top: 60px;">
         <Sidebar :is-collapsed="isSidebarCollapsed" />
+        <ViewContent />
+<!--
         <MainContent />
+-->
       </div>
     </template>
     <template v-else>
@@ -21,8 +24,11 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import Navbar from './components/Navbar.vue';
 import Sidebar from '@/components/Sidebar.vue';
-import MainContent from './components/MainContent.vue';
+import ViewContent from './components/ViewContent.vue';
 
+/*
+import MainContent from './components/MainContent.vue';
+*/
 const router = useRouter();
 const authStore = useAuthStore();
 const isSidebarCollapsed = ref(false);

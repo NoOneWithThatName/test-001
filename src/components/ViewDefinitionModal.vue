@@ -15,7 +15,7 @@
                 <input
                   v-model="column.name"
                   type="text"
-                  placeholder="Enter column name"
+                  placeholder="Enter column nameXXX"
                   required
                   :class="{ error: column.error }"
                   @input="validateColumn(index)"

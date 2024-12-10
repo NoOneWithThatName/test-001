@@ -44,7 +44,7 @@ const showEditModal = ref(false);
 
 const currentView = computed(() => {
   if (route.path === '/') return null;
-  
+  /*
   // Handle Licenses view
   if (route.path === '/licenses') {
     return {
@@ -53,7 +53,7 @@ const currentView = computed(() => {
       path: '/licenses'
     };
   }
-  
+  */
   return viewStore.getUserViews().find(view => view.path === route.path);
 });
 

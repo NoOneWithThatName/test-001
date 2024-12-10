@@ -2,7 +2,7 @@
   <div v-if="show" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h2>{{ item ? 'Edit' : 'Add' }} Item</h2>
+        <h2>{{ item ? 'Edit' : 'Add' }} Data</h2>
         <button class="close-btn" @click="closeModal">×</button>
       </div>
       
@@ -13,16 +13,49 @@
         </div>
         <form v-else @submit.prevent="handleSubmit">
           <div v-for="col in columns" :key="col.id" class="form-group">
-            <label :for="col.id">{{ col.name }}</label>
-            <input
+            <label :for="col.id">{{ col.label || col.name }}</label>
+            
+            <select 
+              v-if="getInputComponent(col) === 'select'"
               :id="col.id"
               v-model="formData[col.id]"
-              :type="getInputType(col.type)"
-              :step="getInputStep(col.type)"
-              :min="getInputMin(col.type)"
               required
+              class="form-control"
             >
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+            
+            <input 
+              v-else-if="getInputComponent(col) === 'url-input'"
+              :id="col.id"
+              v-model="formData[col.id]"
+              type="text"
+              :placeholder="`Enter ${col.label || col.name}`"
+              @blur="validateUrl(col.id)"
+              class="form-control"
+            />
+            
+            <input
+              v-else
+              :id="col.id"
+              v-model="formData[col.id]"
+              :type="getInputType(col?.type)"
+              :step="getInputStep(col?.type)"
+              :min="getInputMin(col?.type)"
+              :placeholder="`Enter ${col.label || col.name}`"
+              required
+              class="form-control"
+            >
+            
+            <div 
+              v-if="fieldErrors[col.id]" 
+              class="error-message text-danger"
+            >
+              {{ fieldErrors[col.id] }}
+            </div>
           </div>
+          
           <div class="button-group">
             <button type="button" class="cancel-btn" @click="closeModal">Cancel</button>
             <button type="submit" class="save-btn">Save</button>
@@ -34,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
   show: {
@@ -54,6 +87,7 @@ const props = defineProps({
 const emit = defineEmits(['update:show', 'save'])
 
 const formData = ref({})
+const fieldErrors = ref({})
 
 // Initialize form data when item or columns change
 watch([() => props.item, () => props.columns], ([newItem, newColumns]) => {
@@ -63,7 +97,8 @@ watch([() => props.item, () => props.columns], ([newItem, newColumns]) => {
   } else if (newColumns) {
     // When adding new item
     formData.value = newColumns.reduce((acc, col) => {
-      acc[col.id] = ''
+      // Set default to 'Yes' for Active or boolean columns
+      acc[col.id] = isActiveColumn(col) ? 'Yes' : ''
       return acc
     }, {})
   }
@@ -109,11 +144,65 @@ function getInputMin(columnType) {
   }
 }
 
+function isActiveColumn(column) {
+  return column.id === 'active' || 
+         column.name === 'Active' || 
+         column.name?.toLowerCase() === 'active' ||
+         column.type === 'boolean'
+}
+
+function getInputComponent(column) {
+  // Force Active column to be a dropdown
+  if (isActiveColumn(column)) {
+    return 'select'
+  }
+  if (column.type === 'url') {
+    return 'url-input'
+  }
+  return 'input'
+}
+
+function validateUrl(columnId) {
+  const url = formData.value[columnId]
+  
+  // Clear previous error
+  fieldErrors.value[columnId] = ''
+  
+  // Skip validation if URL is empty
+  if (!url) return true
+  
+  // Trim whitespace
+  const trimmedUrl = url.trim()
+  
+  // Domain name validation regex
+  // Allows domain names with optional subdomains, allows letters, numbers, hyphens
+  // Requires at least one dot and a top-level domain of 2-6 characters
+  const domainRegex = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.([a-zA-Z]{2,})$/
+  
+  if (!domainRegex.test(trimmedUrl)) {
+    // Set error message for invalid domain
+    fieldErrors.value[columnId] = 'Please enter a valid domain name (e.g., www.example.com or subdomain.example.co.uk)'
+    return false
+  }
+  
+  return true
+}
+
 function closeModal() {
   emit('update:show', false)
 }
 
 function handleSubmit() {
+  // Validate all fields before submission
+  const isValid = props.columns.every(col => {
+    if (col.type === 'url') {
+      return validateUrl(col.id)
+    }
+    return true
+  })
+
+  if (!isValid) return
+
   const finalData = {
     id: props.item?.id || Date.now(),
     ...formData.value
@@ -179,7 +268,7 @@ function handleSubmit() {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
 }
 
@@ -194,6 +283,14 @@ function handleSubmit() {
 .form-group input:focus {
   border-color: #4CAF50;
   outline: none;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 .button-group {
@@ -238,5 +335,23 @@ function handleSubmit() {
 .no-columns p {
   margin-bottom: 15px;
   color: #666;
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.text-danger {
+  color: #f44336;
 }
 </style>

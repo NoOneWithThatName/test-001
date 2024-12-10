@@ -1,7 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
 import LoginView from '../views/LoginView.vue'
+import ViewContent from '../components/ViewContent.vue'
+
+/*
 import MainContent from '../components/MainContent.vue'
+*/
 import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
@@ -18,6 +22,7 @@ const router = createRouter({
       component: Dashboard,
       meta: { requiresAuth: true }
     },
+/*
     {
       // System views (like licenses)
       path: '/views/:viewId',
@@ -26,11 +31,12 @@ const router = createRouter({
       meta: { isSystemView: true, requiresAuth: true },
       props: true
     },
+*/
     {
       // User-created views
       path: '/views/:viewId',
       name: 'UserView',
-      component: MainContent,
+      component: ViewContent,
       meta: { isUserView: true, requiresAuth: true },
       props: true
     },
